@@ -1,0 +1,15 @@
+{
+  "name": "timetable-bot",
+  "version": "1.0.0",
+  "description": "WhatsApp timetable bot",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js",
+    "puppeteer": "^24.11.2",
+    "qrcode-terminal": "^0.12.0",
+    "node-cron": "^3.0.3"
+  }
+}
