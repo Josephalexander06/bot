@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Reminders</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #141E30, #243B55);
+            margin: 0;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        li:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .delete-btn {
+            background: #ff4b5c;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: #ff2e44;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            li {
+    background: rgba(255, 255, 255, 0.1);
+    margin: 10px 0;
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    word-break: break-word;    /* Ensure long words wrap */
+
+}
+
+
+
+            .delete-btn {
+                margin-top: 8px;
+                width: 100%;
+            }
+        }
+
+        #resetTimetableBtn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background 0.3s ease;
+        }
+        .reminder-text {
+    flex: 1 1 100%;
+    max-width: 100%;
+overflow-wrap: anywhere;
+
+}
+
+        #resetTimetableBtn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>📅 Reminders List</h2>
+        <ul id="remindersList"></ul>
+    </div>
+
+    <script>
+        async function loadReminders() {
+            const res = await fetch('/get-reminders');
+            const reminders = await res.json();
+
+            const list = document.getElementById('remindersList');
+            li.innerHTML = `
+    <div class="reminder-text"><strong>${reminder.date}</strong>: ${reminder.text}</div>
+`;
+li.appendChild(delBtn);
+
+
+            
+
+
+            reminders.forEach((reminder, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${reminder.date}</strong>: ${reminder.text}`;
+
+                const delBtn = document.createElement('button');
+                delBtn.textContent = 'Delete';
+                delBtn.className = 'delete-btn';
+                delBtn.onclick = async () => {
+                    await fetch('/delete-reminder', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ index })
+                    });
+                    loadReminders();
+                };
+
+                li.appendChild(delBtn);
+                list.appendChild(li);
+            });
+        }
+
+        loadReminders();
+    </script>
+</body>
+
+</html>

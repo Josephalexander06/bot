@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Reminder</title>
+    <style>
+        * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    background: #fff;
+    max-width: 600px;
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    padding: 30px 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+h2, h3 {
+    text-align: center;
+    color: #222;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: #333;
+}
+
+input, textarea, button {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input:focus, textarea:focus {
+    border-color: #007BFF;
+}
+
+button {
+    background: #007BFF;
+    color: white;
+    border: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: #f0f4f8;
+    margin-bottom: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    flex-wrap: wrap;
+}
+
+.delete-btn {
+    background: #ff4d4f;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 20px 15px;
+    }
+
+    li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .delete-btn {
+        align-self: flex-end;
+    }
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Add Reminder</h2>
+
+        <label for="date">Select Date</label>
+        <input type="date" id="date" min="">
+
+
+        <label for="reminderText">Reminder Text</label>
+        <textarea id="reminderText" placeholder="e.g., Submit assignment"></textarea>
+
+        <button id="addReminderBtn">Add Reminder</button>
+
+        <h3>Reminders List</h3>
+        <ul id="remindersList"></ul>
+
+        <button id="uploadRemindersBtn">Upload Reminders</button>
+    </div>
+
+    <script>
+        const reminders = [];
+
+        document.getElementById('addReminderBtn').addEventListener('click', () => {
+            const dateInput = document.getElementById('date');
+            const date = dateInput.value;
+            const text = document.getElementById('reminderText').value.trim();
+
+            if (!date || !text) {
+                alert('Please fill all fields.');
+                return;
+            }
+
+            if (new Date(date) < new Date().setHours(0, 0, 0, 0)) {
+                alert('Cannot select a past date.');
+                return;
+            }
+
+            reminders.push({ date, text });
+            renderReminders();
+            clearFields();
+        });
+
+
+        function renderReminders() {
+            const list = document.getElementById('remindersList');
+            list.innerHTML = '';
+            reminders.forEach((rem, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${rem.date} - ${rem.text}`;
+                const delBtn = document.createElement('button');
+                delBtn.textContent = 'Delete';
+                delBtn.className = 'delete-btn';
+                delBtn.onclick = () => {
+                    reminders.splice(index, 1);
+                    renderReminders();
+                };
+                li.appendChild(delBtn);
+                list.appendChild(li);
+            });
+        }
+
+        function clearFields() {
+            document.getElementById('date').value = '';
+            document.getElementById('reminderText').value = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+        });
+
+
+        document.getElementById('uploadRemindersBtn').addEventListener('click', async () => {
+            if (reminders.length === 0) {
+                alert('No reminders to upload.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/add-reminder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reminders })
+                });
+
+                const result = await res.text();
+                alert(result);
+                reminders.length = 0;
+                renderReminders();
+            } catch (err) {
+                alert('Failed to upload reminders.');
+            }
+        });
+    </script>
+</body>
+
+</html>

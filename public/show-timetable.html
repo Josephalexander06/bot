@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Timetable</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 950px;
+            margin: auto;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            background: rgba(255,255,255,0.03);
+        }
+        th, td {
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+        }
+        th {
+            background: #111;
+            color: #0ff;
+            text-transform: uppercase;
+        }
+        td {
+            position: relative;
+        }
+        .btn {
+            background: #0ff;
+            border: none;
+            color: #111;
+            font-size: 12px;
+            padding: 4px 8px;
+            margin: 0 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn:hover {
+            background: #fff;
+            color: #000;
+        }
+        .subject-cell {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🎬 Cinematic Weekly Timetable</h2>
+    <table id="timetableGrid"></table>
+</div>
+<button id="resetTimetableBtn">Reset Timetable</button>
+
+<script>
+    const timeSlots = ["9AM", "10AM", "11AM", "12PM", "1PM", "2PM", "3PM", "4PM"];
+    const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+    async function loadTimetable() {
+        const res = await fetch('/get-timetable');
+        const timetable = await res.json();
+
+        const table = document.getElementById('timetableGrid');
+        table.innerHTML = '';
+
+        // Table header
+        let header = '<tr><th>Day / Time</th>';
+        timeSlots.forEach(time => header += `<th>${time}</th>`);
+        header += '</tr>';
+        table.innerHTML += header;
+
+        // Days + subjects
+        days.forEach(day => {
+            let row = `<tr><td><strong>${day}</strong></td>`;
+            const entries = timetable[day.toLowerCase()] || [];
+
+            timeSlots.forEach(slot => {
+                const subjectEntry = entries.find(e => e.startsWith(slot));
+                if (subjectEntry) {
+                    const subject = subjectEntry.split('-')[1];
+                    row += `<td>
+                        <div class="subject-cell">
+                            <span>${subject}</span>
+                            <div>
+                                <button class="btn" onclick="editSubject('${day}', '${slot}')">Edit</button>
+                                <button class="btn" onclick="deleteSubject('${day}', '${slot}')">Delete</button>
+                            </div>
+                        </div>
+                    </td>`;
+                } else {
+                    row += `<td><button class="btn" onclick="addSubject('${day}', '${slot}')">Add</button></td>`;
+                }
+            });
+            row += '</tr>';
+            table.innerHTML += row;
+        });
+    }
+
+    async function editSubject(day, time) {
+        const newSubject = prompt(`Edit subject for ${day} at ${time}:`);
+        if (newSubject) {
+            await fetch('/edit-timetable-subject', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ day, time, newSubject })
+            });
+            loadTimetable();
+        }
+    }
+
+    async function deleteSubject(day, time) {
+        if (confirm(`Delete subject for ${day} at ${time}?`)) {
+            await fetch('/delete-timetable-subject', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ day, time })
+            });
+            loadTimetable();
+        }
+    }
+
+    async function addSubject(day, time) {
+        const newSubject = prompt(`Enter subject for ${day} at ${time}:`);
+        if (newSubject) {
+            await fetch('/add-timetable-subject', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ day, time, newSubject })
+            });
+            loadTimetable();
+        }
+    }
+
+    document.getElementById('resetTimetableBtn')?.addEventListener('click', async () => {
+                if (confirm('Are you sure you want to reset the entire timetable?')) {
+                    await fetch('/reset-timetable', { method: 'POST' });
+                    alert('✅ Timetable has been reset.');
+                    fetchData(); // refresh the data display
+                }
+            });
+    loadTimetable();
+</script>
+
+</body>
+</html>

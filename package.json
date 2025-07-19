@@ -1,15 +1,27 @@
 {
-  "name": "timetable-bot",
+  "name": "bot",
   "version": "1.0.0",
   "description": "WhatsApp timetable bot",
+  "homepage": "https://github.com/Josephalexander06/bot#readme",
+  "bugs": {
+    "url": "https://github.com/Josephalexander06/bot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Josephalexander06/bot.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js"
   },
   "dependencies": {
-    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js",
+    "express": "^5.1.0",
+    "node-cron": "^3.0.3",
     "puppeteer": "^24.11.2",
     "qrcode-terminal": "^0.12.0",
-    "node-cron": "^3.0.3"
+    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js"
   }
 }
